@@ -103,13 +103,14 @@ void setup() {
     sei();
 
     for (int i = 0; i < NUM_BUTTONS; i++) {
-    buttons[i].attach( BUTTON_PINS[i] , INPUT_PULLUP  );       //setup the bounce instance for the current button
-    buttons[i].interval(25);              // interval in ms
-  }
+        buttons[i].attach( BUTTON_PINS[i] , INPUT_PULLUP  );       //setup the bounce instance for the current button
+        buttons[i].interval(25);              // interval in ms
+    }
 
     
     pinMode(LED_PIN,OUTPUT); // Setup the LED
     digitalWrite(LED_PIN,internalLedState);
+    playMelody();
 
     delay(3000); // power-up safety delay
     // It's important to set the color correction for your LED strip here,
