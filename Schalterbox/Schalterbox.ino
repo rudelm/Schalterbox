@@ -3,9 +3,9 @@
 #include <Bounce2.h>
 #include "pitches.h"
 
-#define ENCODER_PIN_A 2
-#define ENCODER_PIN_B 3
-#define ENCODER_PIN_BUTTON 4
+#define ENCODER_PIN_BUTTON 2
+#define ENCODER_PIN_A 3
+#define ENCODER_PIN_B 4
 #define BUZZER_PIN 5
 #define DATA_PIN      11
 #define CLOCK_PIN     12
@@ -97,10 +97,7 @@ void playBeep();
 
 void setup() {
     Serial.begin(9600);
-    r.begin();
-    PCICR |= (1 << PCIE2);
-    PCMSK2 |= (1 << PCINT18) | (1 << PCINT19);
-    sei();
+    r.begin(true);
 
     for (int i = 0; i < NUM_BUTTONS; i++) {
         buttons[i].attach( BUTTON_PINS[i] , INPUT_PULLUP  );       //setup the bounce instance for the current button
@@ -119,20 +116,6 @@ void setup() {
     FastLED.setBrightness( BRIGHTNESS );
 }
 
-// Interrupt service routine to react on rotary encoder
-ISR(PCINT2_vect) {
-    unsigned char result = r.process();
-    if (result == DIR_NONE) {
-        // do nothing
-    }
-    else if (result == DIR_CW) {
-        Serial.println("ClockWise");
-    }
-    else if (result == DIR_CCW) {
-        Serial.println("CounterClockWise");
-    }
-}
-
 void playMelody() {
     // iterate over the notes of the melody:    
     for (int thisNote = 0; thisNote < 8; thisNote++) {
@@ -140,19 +123,19 @@ void playMelody() {
         // to calculate the note duration, take one second divided by the note type.
         //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
         int noteDuration = 1000 / noteDurations[thisNote];
-        tone(5, melody[thisNote], noteDuration);
+        tone(BUZZER_PIN, melody[thisNote], noteDuration);
 
         // to distinguish the notes, set a minimum time between them.
         // the note's duration + 30% seems to work well:
         int pauseBetweenNotes = noteDuration * 1.30;
         delay(pauseBetweenNotes);
         // stop the tone playing:
-        noTone(5);
+        noTone(BUZZER_PIN);
     }
 }
 
 void playBeep() {
-
+    tone(BUZZER_PIN, 1000, 100);
 }
 
 void loop()
@@ -164,12 +147,26 @@ void loop()
         buttons[i].update();
         // If it fell, flag the need to toggle the LED
         if ( buttons[i].fell() ) {
+            String message = "Button on Pin " + i;
+            message == message + " was pressed";
+            Serial.println(message);
             needToToggleLed = true;
         }
     }
 
+    unsigned char result = r.process();
+    if (result == DIR_NONE) {
+        // do nothing
+    }
+    else if (result == DIR_CW) {
+        Serial.println("ClockWise");
+    }
+    else if (result == DIR_CCW) {
+        Serial.println("CounterClockWise");
+    }
+
     // if a LED toggle has been flagged :
-    if ( needToToggleLed ) {
+    if (needToToggleLed) {
         // Toggle LED state :
         internalLedState = !internalLedState;
         digitalWrite(LED_PIN, internalLedState);
@@ -191,7 +188,7 @@ void loop()
 
     // Black out the LEDs for a few secnds between color changes
     // to let the eyes and brains adjust
-    if( (secs % DISPLAYTIME) < BLACKTIME) {
+    if((secs % DISPLAYTIME) < BLACKTIME) {
         memset8( leds, 0, NUM_LEDS * sizeof(CRGB));
     }
     

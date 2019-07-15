@@ -1,7 +1,7 @@
 {
     "board": "arduino:avr:mega",
     "configuration": "cpu=atmega2560",
-    "port": "/dev/cu.wchusbserial1420",
+    "port": "/dev/cu.usbmodem14101",
     "sketch": "Schalterbox/Schalterbox.ino",
     "programmer": "AVRISP mkII"
 }
