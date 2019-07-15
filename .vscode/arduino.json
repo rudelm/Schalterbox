@@ -1,0 +1,7 @@
+{
+    "board": "arduino:avr:mega",
+    "configuration": "cpu=atmega2560",
+    "port": "/dev/cu.wchusbserial1420",
+    "sketch": "ManagedWifiDhtInfluxDB/ManagedWifiDhtInfluxDB.ino",
+    "programmer": "AVRISP mkII"
+}
