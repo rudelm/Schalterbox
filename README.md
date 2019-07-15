@@ -75,6 +75,8 @@ Debouncing a push button to get a reliable button state.
 
 Pin 5
 
+Obsolete since we use the Bounce2 library.
+
 ### ColorTemperature
 Example of the FastLED library to control the WS2801 LED stripes.
 

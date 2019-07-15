@@ -1,6 +1,7 @@
 #include <FastLED.h>
 #include <Rotary.h>
 #include <Bounce2.h>
+#include "pitches.h"
 
 #define ENCODER_PIN_A 2
 #define ENCODER_PIN_B 3
@@ -75,11 +76,24 @@ CRGB leds[NUM_LEDS];
 // How many seconds to show black between switches
 #define BLACKTIME   3
 
-int ledState = LOW;
+int internalLedState = LOW;
 
+// notes in the melody:
+int melody[] = {
+  NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4
+};
+
+// note durations: 4 = quarter note, 8 = eighth note, etc.:
+int noteDurations[] = {
+  4, 8, 8, 4, 4, 4, 4, 4
+};
 
 Rotary r = Rotary(ENCODER_PIN_A, ENCODER_PIN_B);
 Bounce * buttons = new Bounce[NUM_BUTTONS];
+
+// declaring prototypes
+void playMelody();
+void playBeep();
 
 void setup() {
     Serial.begin(9600);
@@ -95,7 +109,7 @@ void setup() {
 
     
     pinMode(LED_PIN,OUTPUT); // Setup the LED
-    digitalWrite(LED_PIN,ledState);
+    digitalWrite(LED_PIN,internalLedState);
 
     delay(3000); // power-up safety delay
     // It's important to set the color correction for your LED strip here,
@@ -118,6 +132,27 @@ ISR(PCINT2_vect) {
     }
 }
 
+void playMelody() {
+    // iterate over the notes of the melody:    
+    for (int thisNote = 0; thisNote < 8; thisNote++) {
+
+        // to calculate the note duration, take one second divided by the note type.
+        //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+        int noteDuration = 1000 / noteDurations[thisNote];
+        tone(5, melody[thisNote], noteDuration);
+
+        // to distinguish the notes, set a minimum time between them.
+        // the note's duration + 30% seems to work well:
+        int pauseBetweenNotes = noteDuration * 1.30;
+        delay(pauseBetweenNotes);
+        // stop the tone playing:
+        noTone(5);
+    }
+}
+
+void playBeep() {
+
+}
 
 void loop()
 {
@@ -135,8 +170,8 @@ void loop()
     // if a LED toggle has been flagged :
     if ( needToToggleLed ) {
         // Toggle LED state :
-        ledState = !ledState;
-        digitalWrite(LED_PIN, ledState);
+        internalLedState = !internalLedState;
+        digitalWrite(LED_PIN, internalLedState);
     }
 
     // draw a generic, no-name rainbow
