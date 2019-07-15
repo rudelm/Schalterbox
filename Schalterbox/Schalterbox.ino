@@ -69,7 +69,6 @@ CRGB leds[NUM_LEDS];
 //    UncorrectedTemperature;
 
 #define TEMPERATURE_1 Tungsten100W
-#define TEMPERATURE_2 OvercastSky
 
 // How many seconds to show each temperature before switching
 #define DISPLAYTIME 20
@@ -77,6 +76,9 @@ CRGB leds[NUM_LEDS];
 #define BLACKTIME   3
 
 int internalLedState = LOW;
+int activeLedNumber = 0;
+int ledInc = 1;
+int ledSpeed = 10;
 
 // notes in the melody:
 int melody[] = {
@@ -140,58 +142,62 @@ void playBeep() {
 
 void loop()
 {
-    bool needToToggleLed = false;
-
-    for (int i = 0; i < NUM_BUTTONS; i++)  {
-        // Update the Bounce instance :
-        buttons[i].update();
-        // If it fell, flag the need to toggle the LED
-        if ( buttons[i].fell() ) {
-            String message = "Button on Pin " + i;
-            message == message + " was pressed";
-            Serial.println(message);
-            needToToggleLed = true;
-        }
-    }
-
-    unsigned char result = r.process();
-    if (result == DIR_NONE) {
-        // do nothing
-    }
-    else if (result == DIR_CW) {
-        Serial.println("ClockWise");
-    }
-    else if (result == DIR_CCW) {
-        Serial.println("CounterClockWise");
-    }
-
-    // if a LED toggle has been flagged :
-    if (needToToggleLed) {
-        // Toggle LED state :
-        internalLedState = !internalLedState;
-        digitalWrite(LED_PIN, internalLedState);
-    }
-
-    // draw a generic, no-name rainbow
-    static uint8_t starthue = 0;
-    fill_rainbow( leds + 5, NUM_LEDS - 5, --starthue, 20);
-
-    // Choose which 'color temperature' profile to enable.
     uint8_t secs = (millis() / 1000) % (DISPLAYTIME * 2);
-    if( secs < DISPLAYTIME) {
-        FastLED.setTemperature( TEMPERATURE_1 ); // first temperature
-        leds[0] = TEMPERATURE_1; // show indicator pixel
-    } else {
-        FastLED.setTemperature( TEMPERATURE_2 ); // second temperature
-        leds[0] = TEMPERATURE_2; // show indicator pixel
-    }
+    FastLED.setTemperature( TEMPERATURE_1 ); // first temperature
+    leds[0] = TEMPERATURE_1; // show indicator pixel
 
-    // Black out the LEDs for a few secnds between color changes
-    // to let the eyes and brains adjust
-    if((secs % DISPLAYTIME) < BLACKTIME) {
-        memset8( leds, 0, NUM_LEDS * sizeof(CRGB));
+    FastLED.clear();
+    for (int i = 0; i < NUM_LEDS; i++) {
+        if (i == activeLedNumber) {
+            leds[i] = CRGB::Green;
+        } else {
+            leds[i] = CRGB::Blue;
+        }
     }
     
     FastLED.show();
-    FastLED.delay(8);
+    
+    for (int t = 0; t < 25; t++) {
+        FastLED.delay(ledSpeed);
+        bool needToToggleLed = false;
+
+        for (int i = 0; i < NUM_BUTTONS; i++)  {
+            // Update the Bounce instance :
+            buttons[i].update();
+            // If it fell, flag the need to toggle the LED
+            if ( buttons[i].fell() ) {
+                String message = "Button on Pin " + i;
+                message = message + " was pressed";
+                Serial.println(message);
+                needToToggleLed = true;
+                ledInc *= -1;
+            }
+        }
+
+        unsigned char result = r.process();
+        if (result == DIR_NONE) {
+            // do nothing
+        }
+        else if (result == DIR_CW) {
+            Serial.println("ClockWise");
+            ledSpeed = ledSpeed + 1;
+        }
+        else if (result == DIR_CCW) {
+            Serial.println("CounterClockWise");
+            ledSpeed = ledSpeed - 1;
+
+            if (ledSpeed <= 1) {
+                ledSpeed = 1;
+            }
+        }
+
+        // if a LED toggle has been flagged :
+        if (needToToggleLed) {
+            // Toggle LED state :
+            internalLedState = !internalLedState;
+            digitalWrite(LED_PIN, internalLedState);
+        }
+    }
+
+    activeLedNumber = (activeLedNumber + ledInc) % NUM_LEDS;
 }

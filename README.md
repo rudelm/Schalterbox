@@ -33,8 +33,8 @@ pinMode(pin, INPUT_PULLUP);     // Enable pin as input and activate internal pul
 ### WS2801 LED strips
 https://learn.adafruit.com/12mm-led-pixels/wiring
 * power (red) to power (5V)
-* ground (blue) to ground (GND)
-* data (yellow) to Arduino pin 11
+* ground (yellow) to ground (GND)
+* data (green) to Arduino pin 11
 * clock (blue) to Arduino pin 12
 
 ### Push button for colors
