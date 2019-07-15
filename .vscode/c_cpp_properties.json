@@ -21,6 +21,8 @@
                 "limitSymbolsToIncludedHeaders": false,
                 "path": [
                     "~/Documents/Arduino/libraries",
+                    "~/Documents/Arduino/libraries/Rotary",
+                    "~/Documents/Arduino/libraries/Bounce2",
                     "${workspaceFolder}/**"
                 ]
             },

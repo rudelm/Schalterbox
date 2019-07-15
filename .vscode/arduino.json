@@ -2,6 +2,6 @@
     "board": "arduino:avr:mega",
     "configuration": "cpu=atmega2560",
     "port": "/dev/cu.wchusbserial1420",
-    "sketch": "ManagedWifiDhtInfluxDB/ManagedWifiDhtInfluxDB.ino",
+    "sketch": "Schalterbox/Schalterbox.ino",
     "programmer": "AVRISP mkII"
 }

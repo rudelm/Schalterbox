@@ -1,6 +1,12 @@
 # Schalterbox
 The Schalterbox is a hobby project of [@sippndipp](https://twitter.com/sippndipp) and [@rudelm](https://twitter.com/rudelm). Our kids love to push buttons so we decided to make something blinky for them.
 
+## Libraries
+* https://github.com/brianlow/Rotary
+* https://github.com/FastLED/FastLED
+* https://github.com/thomasfredericks/Bounce2
+
+
 ## Wiring
 ```
 When connecting a sensor to a pin configured with INPUT_PULLUP, the other end should be connected to ground. In the case of a simple switch, this causes the pin to read HIGH when the switch is open, and LOW when the switch is pressed.
