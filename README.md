@@ -15,15 +15,16 @@ Taken from https://www.arduino.cc/en/Tutorial/DigitalPins
 
 So every switch is connected on one pin to the Arduino and the other is connected to ground. Which means we need to check if the pin value is low and need to react to the push or change.
 
-
 ```
 pinMode(pin, INPUT_PULLUP);     // Enable pin as input and activate internal pullup resistor
 ```
 
+The Rotary Encoder also requires in its `begin()` method a boolean set to true, so that the [INPUT_PULLUP is used](https://github.com/brianlow/Rotary/blob/master/Rotary.cpp#L81).
+
 ### Rotary Encoder
-* encoder pin A to Arduino pin 2
-* encoder pin B to Arduino pin 3
-* push button pin to Arduino pin 4
+* push button pin to Arduino pin 2
+* encoder pin A to Arduino pin 3
+* encoder pin B to Arduino pin 4
 * both encoder ground pins to ground (GND)
 
 ### Piezo buzzer
@@ -31,7 +32,8 @@ pinMode(pin, INPUT_PULLUP);     // Enable pin as input and activate internal pul
 * other piezo buzzer pin to ground
 
 ### WS2801 LED strips
-https://learn.adafruit.com/12mm-led-pixels/wiring
+Our LED strips don't use the default color scheme for the wiring, so this is specifically for our used scheme. However, you should be able to find which line is data and clock for your LED strip. [Here's an example from Adafruit for WS2801 LED strips](https://learn.adafruit.com/12mm-led-pixels/wiring).
+
 * power (red) to power (5V)
 * ground (yellow) to ground (GND)
 * data (green) to Arduino pin 11
@@ -73,40 +75,38 @@ The examples folder contains example code to deal with certain aspects of our bo
 ### Debounce
 Debouncing a push button to get a reliable button state.
 
-Pin 5
+* Pin 5
 
-Obsolete since we use the Bounce2 library.
+Obsolete since we use the [Bounce2 library](https://github.com/thomasfredericks/Bounce2).
 
 ### ColorTemperature
 Example of the FastLED library to control the WS2801 LED stripes.
 
-#define DATA_PIN    12
-#define CLOCK_PIN   13
+* data pin on Arduino pin 12
+* clock pin on Arduino pin 13
 
 ### toneMelody
 Example of the Arduino `tone()` method and how to play melodies on a piezo buzzer. https://www.arduino.cc/en/Tutorial/ToneMelody?from=Tutorial.Tone
 
-Pin 5
+* Pin 5
 
 ### Rotary Encoder
+We use a rotary encoder from ALPS, bought from [Reichelt Elektronik](https://www.reichelt.de/drehimpulsegeber-15-impulse-30-rastungen-horizontal-stec11b01-p73911.html?). There's unfortunately no data sheet available. However, we've seen a suitable pin layout on the [mikrocontroller.net forum](https://www.mikrocontroller.net/topic/180758).
+
+![Rotary Encoder pin layout](./datasheets/Drehimpulsgeber.jpg "Rotary Encoder pin layout")
+
+According to Reichelt, our rotary encoder has
 * 15 pulses
 * 30 lock-in positions
-* push button
+* one push button
 
-Two pins required for rotation detection
-One pin required for push button
+Two pins are required for rotation detection
+One pin is required for push button
 
 The circuit:
-* encoder pin A to Arduino pin 2
-* encoder pin B to Arduino pin 3
-* push button pin to Arduino pin 4
+* push button pin to Arduino pin 2
+* encoder pin A to Arduino pin 3
+* encoder pin B to Arduino pin 4
 * encoder ground pin to ground (GND)
 
-https://www.reichelt.de/drehimpulsegeber-15-impulse-30-rastungen-horizontal-stec11b01-p73911.html?
-https://www.mikrocontroller.net/topic/180758
-https://www.mikrocontroller.net/attachment/highlight/1971
-
-Either use polling to get rotation state or use interrupts (recommended).
-
-Arduino Libs:
-* https://github.com/brianlow/Rotary
+We've tried to use Interrupts on our Arduino Mega, but weren't successful. The example [interrupt](examples/RotaryEncoder/interrupt/interrupt.ino) doesn't work, the [Polling](examples/RotaryEncoder/Polling/Polling.ino) example works.
