@@ -124,7 +124,7 @@ void loop()
             buttons[i].update();
             // If it fell, flag the need to toggle the LED
             if ( buttons[i].fell() ) {
-                String message = "Button on Pin " + i;
+                String message = "Button on Pin " + BUTTON_PINS[i];
                 message = message + " was pressed";
                 Serial.println(message);
                 needToToggleLed = true;
