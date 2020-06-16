@@ -110,3 +110,8 @@ The circuit:
 * encoder ground pin to ground (GND)
 
 We've tried to use Interrupts on our Arduino Mega, but weren't successful. The example [interrupt](examples/RotaryEncoder/interrupt/interrupt.ino) doesn't work, the [Polling](examples/RotaryEncoder/Polling/Polling.ino) example works.
+
+### Troubleshooting
+
+https://github.com/adrianmihalko/ch340g-ch34g-ch34x-mac-os-x-driver
+
