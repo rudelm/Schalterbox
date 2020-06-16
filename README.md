@@ -6,6 +6,10 @@ The Schalterbox is a hobby project of [@sippndipp](https://twitter.com/sippndipp
 * https://github.com/FastLED/FastLED
 * https://github.com/thomasfredericks/Bounce2
 
+### Run the thing
+
+Alt + CMD + R (verify)
+Alt + CMD + U (upload)
 
 ## Wiring
 ```
