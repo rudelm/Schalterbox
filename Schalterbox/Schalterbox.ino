@@ -7,6 +7,7 @@
 #define ENCODER_PIN_A 3
 #define ENCODER_PIN_B 4
 #define BUZZER_PIN 5
+#define BUZZER_SWITCH_PIN 6
 #define DATA_PIN      11
 #define CLOCK_PIN     12
 #define LED_PIN       13 // Its the internal LED on the Arduino
@@ -15,19 +16,18 @@
 #define BUTTON_BLUE_PIN 26
 #define FORWARD_SWITCH_PIN 28
 #define BACKWARD_SWITCH_PIN 30
-#define ROTATION_SWITCH_POS_1_PIN 32
-#define ROTATION_SWITCH_POS_2_PIN 34
-#define ROTATION_SWITCH_POS_3_PIN 36
-#define ROTATION_SWITCH_POS_4_PIN 38
-#define ROTATION_SWITCH_POS_5_PIN 40
-#define ROTATION_SWITCH_POS_6_PIN 42
+// #define ROTATION_SWITCH_POS_1_PIN 32
+// #define ROTATION_SWITCH_POS_2_PIN 34
+// #define ROTATION_SWITCH_POS_3_PIN 36
+// #define ROTATION_SWITCH_POS_4_PIN 38
+// #define ROTATION_SWITCH_POS_5_PIN 40
+// #define ROTATION_SWITCH_POS_6_PIN 42
 
 
 
-#define NUM_BUTTONS 12
+#define NUM_BUTTONS 7
 const uint8_t BUTTON_PINS[NUM_BUTTONS] = {ENCODER_PIN_BUTTON, BUTTON_RED_PIN, BUTTON_GREEN_PIN, BUTTON_BLUE_PIN,
- FORWARD_SWITCH_PIN, BACKWARD_SWITCH_PIN, ROTATION_SWITCH_POS_1_PIN, ROTATION_SWITCH_POS_2_PIN, ROTATION_SWITCH_POS_3_PIN,
- ROTATION_SWITCH_POS_4_PIN, ROTATION_SWITCH_POS_5_PIN, ROTATION_SWITCH_POS_6_PIN};
+ FORWARD_SWITCH_PIN, BACKWARD_SWITCH_PIN, BUZZER_SWITCH_PIN};
 
 // Information about the LED strip itself
 #define NUM_LEDS    12
@@ -52,6 +52,8 @@ int noteDurations[] = {
   4, 8, 8, 4, 4, 4, 4, 4
 };
 
+boolean buzzerEnabled = false;
+
 Rotary r = Rotary(ENCODER_PIN_A, ENCODER_PIN_B);
 Bounce * buttons = new Bounce[NUM_BUTTONS];
 
@@ -67,7 +69,6 @@ void setup() {
         buttons[i].attach( BUTTON_PINS[i] , INPUT_PULLUP  );       //setup the bounce instance for the current button
         buttons[i].interval(25);              // interval in ms
     }
-
     
     pinMode(LED_PIN,OUTPUT); // Setup the LED
     digitalWrite(LED_PIN,internalLedState);
@@ -99,7 +100,9 @@ void playMelody() {
 }
 
 void playBeep() {
-    tone(BUZZER_PIN, 1000, 100);
+    if (buzzerEnabled) {
+        tone(BUZZER_PIN, 1000, 100);
+    }
 }
 
 void loop()
@@ -119,16 +122,31 @@ void loop()
         FastLED.delay(ledSpeed);
         bool needToToggleLed = false;
 
-        for (int i = 0; i < NUM_BUTTONS; i++)  {
+        for (int i = 0; i < NUM_BUTTONS; i++) {
             // Update the Bounce instance :
             buttons[i].update();
             // If it fell, flag the need to toggle the LED
             if ( buttons[i].fell() ) {
+                // the last entry in the array is the buzzer button
+                if (i == NUM_BUTTONS - 1) {
+                    Serial.println("Buzzer was enabled.");
+                    buzzerEnabled = true;
+                }
+                
                 String message = "Button on Pin " + BUTTON_PINS[i];
                 message = message + " was pressed";
                 Serial.println(message);
                 needToToggleLed = true;
                 ledInc *= -1;
+                playBeep();
+            }
+
+            if ( buttons[i].rose() ) {
+                // the last entry in the array is the buzzer button
+                if (i == NUM_BUTTONS - 1) {
+                    Serial.println("Buzzer was disabled.");
+                    buzzerEnabled = false;
+                }
             }
         }
 
@@ -139,6 +157,7 @@ void loop()
         else if (result == DIR_CW) {
             Serial.println("ClockWise");
             ledSpeed = ledSpeed + 1;
+            playBeep();
         }
         else if (result == DIR_CCW) {
             Serial.println("CounterClockWise");
@@ -147,6 +166,7 @@ void loop()
             if (ledSpeed <= 1) {
                 ledSpeed = 1;
             }
+            playBeep();
         }
 
         // if a LED toggle has been flagged :
