@@ -29,6 +29,7 @@
 const uint8_t BUTTON_PINS[NUM_BUTTONS] = {ENCODER_PIN_BUTTON, BUTTON_RED_PIN, BUTTON_GREEN_PIN, BUTTON_BLUE_PIN,
  FORWARD_SWITCH_PIN, BACKWARD_SWITCH_PIN, BUZZER_SWITCH_PIN};
 
+
 // Information about the LED strip itself
 #define NUM_LEDS    12
 #define CHIPSET     WS2801
@@ -41,6 +42,8 @@ int internalLedState = LOW;
 int activeLedNumber = 0;
 int ledInc = 1;
 int ledSpeed = 10;
+// the last entry in the array is the buzzer button
+int buzzerSwitchArrayPosition = NUM_BUTTONS - 1;
 
 // notes in the melody:
 int melody[] = {
@@ -70,8 +73,8 @@ void setup() {
         buttons[i].interval(25);              // interval in ms
     }
 
-    buttons[NUM_BUTTONS - 1].update();
-    int buzzerState = buttons[NUM_BUTTONS - 1].read();
+    buttons[buzzerSwitchArrayPosition].update();
+    int buzzerState = buttons[buzzerSwitchArrayPosition].read();
     if ( buzzerState == LOW ) {
         buzzerEnabled = true;
     } else {
@@ -137,8 +140,7 @@ void loop()
             buttons[i].update();
             // If it fell, flag the need to toggle the LED
             if ( buttons[i].fell() ) {
-                // the last entry in the array is the buzzer button
-                if (i == NUM_BUTTONS - 1) {
+                if (i == buzzerSwitchArrayPosition) {
                     Serial.println("Buzzer was enabled.");
                     buzzerEnabled = true;
                 }
@@ -152,8 +154,7 @@ void loop()
             }
 
             if ( buttons[i].rose() ) {
-                // the last entry in the array is the buzzer button
-                if (i == NUM_BUTTONS - 1) {
+                if (i == buzzerSwitchArrayPosition) {
                     Serial.println("Buzzer was disabled.");
                     buzzerEnabled = false;
                 }
