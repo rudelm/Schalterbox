@@ -1,6 +1,17 @@
 # Schalterbox
 The Schalterbox is a hobby project of [@sippndipp](https://twitter.com/sippndipp) and [@rudelm](https://twitter.com/rudelm). Our kids love to push buttons so we decided to make something blinky for them.
 
+## Setup
+We use VSCode as IDE in combination with the official Arduino app:
+```
+brew cask install vscode arduino
+```
+
+Install these extensions in VSCode:
+* [Arduino](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino)
+* [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
+
+
 ## Libraries
 * https://github.com/brianlow/Rotary
 * https://github.com/FastLED/FastLED
@@ -117,5 +128,16 @@ We've tried to use Interrupts on our Arduino Mega, but weren't successful. The e
 
 ### Troubleshooting
 
-https://github.com/adrianmihalko/ch340g-ch34g-ch34x-mac-os-x-driver
+#### Arduino port cannot be found
+We use an Arduino Clone which doesn't have the original ch340 USB to serial chipset. Here's a [helpful repo](https://github.com/adrianmihalko/ch340g-ch34g-ch34x-mac-os-x-driver) for the installation of the drivers under macOS Mojave and newer. [This](https://forum.arduino.cc/index.php?topic=570440.msg3899568#msg3899568) might also be worth a try.
+
+#### VSCode doesn't find the required libs
+The file [c_cpp_properties.json](.vscode/c_cpp_properties.json) contains references to the required libs. There might be some problems with paths being not working so the compiler complains about missing header files.
+
+Some libs should be installed using the Arduino.app and its extension manager, so that the libs will be available under ~/Documents/Arduino/libraries
+* [FastLED](https://github.com/FastLED/FastLED)
+* [Rotary](https://github.com/brianlow/Rotary)
+
+This lib should be installed manually by either pulling the repo or downloading and extracting the repo to ~/Documents/Arduino/libraries
+* [Bounce2]( https://github.com/thomasfredericks/Bounce2)
 
