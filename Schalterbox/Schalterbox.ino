@@ -65,7 +65,7 @@ void playMelody();
 void playBeep();
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
     r.begin(true);
 
     for (int i = 0; i < NUM_BUTTONS; i++) {
