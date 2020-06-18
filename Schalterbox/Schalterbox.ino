@@ -33,7 +33,7 @@ const uint8_t BUTTON_PINS[NUM_BUTTONS] = {ENCODER_PIN_BUTTON, BUTTON_RED_PIN, BU
 // Information about the LED strip itself
 #define NUM_LEDS    12
 #define CHIPSET     WS2801
-#define COLOR_ORDER GRB
+#define COLOR_ORDER RGB
 CRGB leds[NUM_LEDS];
 
 #define BRIGHTNESS  128
@@ -88,7 +88,9 @@ void setup() {
     delay(3000); // power-up safety delay
     // It's important to set the color correction for your LED strip here,
     // so that colors can be more accurately rendered through the 'temperature' profiles
-    FastLED.addLeds<CHIPSET, DATA_PIN, CLOCK_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalSMD5050 );
+    FastLED.addLeds<CHIPSET, DATA_PIN, CLOCK_PIN, COLOR_ORDER>(leds, NUM_LEDS)
+        .setCorrection( Typical8mmPixel )
+        .setDither(BRIGHTNESS < 255);
     FastLED.setBrightness( BRIGHTNESS );
 }
 
@@ -131,7 +133,7 @@ void loop()
     
     FastLED.show();
     
-    for (int t = 0; t < 25; t++) {
+    for (int t = 0; t < NUM_LEDS; t++) {
         FastLED.delay(ledSpeed);
         bool needToToggleLed = false;
 
