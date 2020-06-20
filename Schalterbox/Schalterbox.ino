@@ -80,8 +80,6 @@ TBlendType    currentBlending;
 
 int internalLedState = LOW;
 int activeLedNumber = 0;
-int ledInc = 1;
-int ledSpeed = 10;
 
 // notes in the melody:
 int melody[] = {
@@ -94,7 +92,6 @@ int noteDurations[] = {
 };
 
 boolean buzzerEnabled = false;
-boolean needToToggleLed = false;
 
 Rotary r = Rotary(ENCODER_PIN_A, ENCODER_PIN_B);
 Bounce * buttons = new Bounce[NUM_BUTTONS];
@@ -179,7 +176,6 @@ void processButtonInputs() {
     for (int i = 0; i < NUM_BUTTONS; i++) {
         // Update the Bounce instance :
         buttons[i].update();
-        // If it fell, flag the need to toggle the LED
         if ( buttons[i].fell() ) {
             switch (i) {
                 case ENCODER_BUTTON_ARRAY_POSITION:
@@ -205,8 +201,6 @@ void processButtonInputs() {
             String message = "Button on Pin " + BUTTON_PINS[i];
             message = message + " was pressed";
             Serial.println(message);
-            needToToggleLed = true;
-            ledInc *= -1;
             playBeep();
         }
 
@@ -215,10 +209,13 @@ void processButtonInputs() {
                 case ENCODER_BUTTON_ARRAY_POSITION:
                     break;
                 case RED_SWITCH_ARRAY_POSITION:
+                    bgclr = HUE_RED;
                     break;
                 case GREEN_SWITCH_ARRAY_POSITION:
+                    bgclr = HUE_GREEN;
                     break;
                 case BLUE_SWITCH_ARRAY_POSITION:
+                    bgclr = HUE_BLUE;
                     break;
                 case FORWARD_SWITCH_ARRAY_POSITION:
                     break;
@@ -242,15 +239,15 @@ void processClickWheelInputs() {
     }
     else if (result == DIR_CW) {
         Serial.println("ClockWise");
-        ledSpeed = ledSpeed + 1;
+        thisspeed = thisspeed + 5;
         playBeep();
     }
     else if (result == DIR_CCW) {
         Serial.println("CounterClockWise");
-        ledSpeed = ledSpeed - 1;
+        thisspeed = thisspeed - 5;
 
-        if (ledSpeed <= 1) {
-            ledSpeed = 1;
+        if (thisspeed <= 1) {
+            thisspeed = 1;
         }
         playBeep();
     }
