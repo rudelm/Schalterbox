@@ -1,7 +1,6 @@
 {
+    "sketch": "Schalterbox/Schalterbox.ino",
     "board": "arduino:avr:mega",
     "configuration": "cpu=atmega2560",
-    "port": "/dev/cu.usbmodem14101",
-    "sketch": "Schalterbox/Schalterbox.ino",
-    "programmer": "AVRISP mkII"
+    "port": "/dev/tty.usbmodem144201"
 }

@@ -32,7 +32,7 @@ const uint8_t BUTTON_PINS[NUM_BUTTONS] = {ENCODER_PIN_BUTTON, BUTTON_RED_PIN, BU
 // Information about the LED strip itself
 #define NUM_LEDS    12
 #define CHIPSET     WS2801
-#define COLOR_ORDER GRB
+#define COLOR_ORDER RGB
 CRGB leds[NUM_LEDS];
 
 #define BRIGHTNESS  128
@@ -40,7 +40,15 @@ CRGB leds[NUM_LEDS];
 int internalLedState = LOW;
 int activeLedNumber = 0;
 int ledInc = 1;
-int ledSpeed = 10;
+int ledSpeed = 5;
+
+byte red = 1;
+byte green = 1;
+byte blue = 1;
+
+byte redFactor = 1;
+byte greenFactor = 1;
+byte blueFactor = 1;
 
 // notes in the melody:
 int melody[] = {
@@ -68,7 +76,7 @@ void setup() {
         buttons[i].interval(25);              // interval in ms
     }
 
-    
+
     pinMode(LED_PIN,OUTPUT); // Setup the LED
     digitalWrite(LED_PIN,internalLedState);
     playMelody();
@@ -81,7 +89,7 @@ void setup() {
 }
 
 void playMelody() {
-    // iterate over the notes of the melody:    
+    // iterate over the notes of the melody:
     for (int thisNote = 0; thisNote < 8; thisNote++) {
 
         // to calculate the note duration, take one second divided by the note type.
@@ -105,16 +113,21 @@ void playBeep() {
 void loop()
 {
     FastLED.clear();
+
     for (int i = 0; i < NUM_LEDS; i++) {
-        if (i == activeLedNumber) {
-            leds[i] = CRGB::Green;
-        } else {
-            leds[i] = CRGB::Blue;
-        }
+      if (i == activeLedNumber) {
+        leds[i] = CRGB((red + i*2) * redFactor, (green + i*3) * greenFactor, (blue + i*4) * blueFactor);
+      } else {
+        leds[i] = CRGB::Red;
+      }
     }
-    
+
+    red+=1;
+    green+=2;
+    blue+=3;
+
     FastLED.show();
-    
+
     for (int t = 0; t < 25; t++) {
         FastLED.delay(ledSpeed);
         bool needToToggleLed = false;

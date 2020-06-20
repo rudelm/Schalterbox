@@ -5,30 +5,29 @@
             "includePath": [
                 "/Applications/Arduino.app/Contents/Java/tools/**",
                 "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/**",
-                "${workspaceFolder}/**",
-                "~/Documents/Arduino/libraries"
+                "~/Documents/Arduino/libraries/**",
+                "${workspaceFolder}/**"
             ],
-            "defines": [],
+            "forcedInclude": [
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino/Arduino.h"
+            ],
             "macFrameworkPath": [
                 "/System/Library/Frameworks",
                 "/Library/Frameworks"
             ],
-            "compilerPath": "/usr/bin/clang",
-            "cStandard": "c11",
-            "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "limitSymbolsToIncludedHeaders": false,
                 "path": [
-                    "~/Documents/Arduino/libraries",
-                    "~/Documents/Arduino/libraries/Rotary",
-                    "~/Documents/Arduino/libraries/Bounce2",
-                    "${workspaceFolder}/**"
+                  "/Applications/Arduino.app/Contents/Java/tools/**",
+                  "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/**",
+                  "~/Documents/Arduino/libraries/**",
+                  "${workspaceFolder}/**"
                 ]
             },
-            "forcedInclude": [
-                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino/Arduino.h"
-            ]
+            "compilerPath": "/usr/local/bin/clang-3.6",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
         }
     ],
     "version": 4
