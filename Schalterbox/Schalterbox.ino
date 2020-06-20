@@ -22,7 +22,13 @@
 // #define ROTATION_SWITCH_POS_4_PIN 38
 // #define ROTATION_SWITCH_POS_5_PIN 40
 // #define ROTATION_SWITCH_POS_6_PIN 42
-
+#define ENCODER_BUTTON_ARRAY_POSITION 0
+#define RED_SWITCH_ARRAY_POSITION 1
+#define GREEN_SWITCH_ARRAY_POSITION 2
+#define BLUE_SWITCH_ARRAY_POSITION 3
+#define FORWARD_SWITCH_ARRAY_POSITION 4
+#define BACKWARD_SWITCH_ARRAY_POSITION 5
+#define BUZZER_SWITCH_ARRAY_POSITION 6
 
 
 #define NUM_BUTTONS 7
@@ -42,8 +48,6 @@ int internalLedState = LOW;
 int activeLedNumber = 0;
 int ledInc = 1;
 int ledSpeed = 10;
-// the last entry in the array is the buzzer button
-int buzzerSwitchArrayPosition = NUM_BUTTONS - 1;
 
 // notes in the melody:
 int melody[] = {
@@ -56,6 +60,7 @@ int noteDurations[] = {
 };
 
 boolean buzzerEnabled = false;
+boolean needToToggleLed = false;
 
 Rotary r = Rotary(ENCODER_PIN_A, ENCODER_PIN_B);
 Bounce * buttons = new Bounce[NUM_BUTTONS];
@@ -73,8 +78,8 @@ void setup() {
         buttons[i].interval(25);              // interval in ms
     }
 
-    buttons[buzzerSwitchArrayPosition].update();
-    int buzzerState = buttons[buzzerSwitchArrayPosition].read();
+    buttons[BUZZER_SWITCH_ARRAY_POSITION].update();
+    int buzzerState = buttons[BUZZER_SWITCH_ARRAY_POSITION].read();
     if ( buzzerState == LOW ) {
         buzzerEnabled = true;
     } else {
@@ -120,6 +125,87 @@ void playBeep() {
     }
 }
 
+void processButtonInputs() {
+    for (int i = 0; i < NUM_BUTTONS; i++) {
+        // Update the Bounce instance :
+        buttons[i].update();
+        // If it fell, flag the need to toggle the LED
+        if ( buttons[i].fell() ) {
+            switch (i) {
+                case ENCODER_BUTTON_ARRAY_POSITION:
+                    break;
+                case RED_SWITCH_ARRAY_POSITION:
+                    break;
+                case GREEN_SWITCH_ARRAY_POSITION:
+                    break;
+                case BLUE_SWITCH_ARRAY_POSITION:
+                    break;
+                case FORWARD_SWITCH_ARRAY_POSITION:
+                    break;
+                case BACKWARD_SWITCH_ARRAY_POSITION:
+                    break;
+                case BUZZER_SWITCH_ARRAY_POSITION:
+                    Serial.println("Buzzer was enabled.");
+                    buzzerEnabled = true;
+                    break;
+                default:
+                    break;
+            }
+
+            String message = "Button on Pin " + BUTTON_PINS[i];
+            message = message + " was pressed";
+            Serial.println(message);
+            needToToggleLed = true;
+            ledInc *= -1;
+            playBeep();
+        }
+
+        if ( buttons[i].rose() ) {
+             switch (i) {
+                case ENCODER_BUTTON_ARRAY_POSITION:
+                    break;
+                case RED_SWITCH_ARRAY_POSITION:
+                    break;
+                case GREEN_SWITCH_ARRAY_POSITION:
+                    break;
+                case BLUE_SWITCH_ARRAY_POSITION:
+                    break;
+                case FORWARD_SWITCH_ARRAY_POSITION:
+                    break;
+                case BACKWARD_SWITCH_ARRAY_POSITION:
+                    break;
+                case BUZZER_SWITCH_ARRAY_POSITION:
+                    Serial.println("Buzzer was disabled.");
+                    buzzerEnabled = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+}
+
+void processClickWheelInputs() {
+    unsigned char result = r.process();
+    if (result == DIR_NONE) {
+        // do nothing
+    }
+    else if (result == DIR_CW) {
+        Serial.println("ClockWise");
+        ledSpeed = ledSpeed + 1;
+        playBeep();
+    }
+    else if (result == DIR_CCW) {
+        Serial.println("CounterClockWise");
+        ledSpeed = ledSpeed - 1;
+
+        if (ledSpeed <= 1) {
+            ledSpeed = 1;
+        }
+        playBeep();
+    }
+}
+
 void loop()
 {
     FastLED.clear();
@@ -135,52 +221,9 @@ void loop()
     
     for (int t = 0; t < NUM_LEDS; t++) {
         FastLED.delay(ledSpeed);
-        bool needToToggleLed = false;
 
-        for (int i = 0; i < NUM_BUTTONS; i++) {
-            // Update the Bounce instance :
-            buttons[i].update();
-            // If it fell, flag the need to toggle the LED
-            if ( buttons[i].fell() ) {
-                if (i == buzzerSwitchArrayPosition) {
-                    Serial.println("Buzzer was enabled.");
-                    buzzerEnabled = true;
-                }
-                
-                String message = "Button on Pin " + BUTTON_PINS[i];
-                message = message + " was pressed";
-                Serial.println(message);
-                needToToggleLed = true;
-                ledInc *= -1;
-                playBeep();
-            }
-
-            if ( buttons[i].rose() ) {
-                if (i == buzzerSwitchArrayPosition) {
-                    Serial.println("Buzzer was disabled.");
-                    buzzerEnabled = false;
-                }
-            }
-        }
-
-        unsigned char result = r.process();
-        if (result == DIR_NONE) {
-            // do nothing
-        }
-        else if (result == DIR_CW) {
-            Serial.println("ClockWise");
-            ledSpeed = ledSpeed + 1;
-            playBeep();
-        }
-        else if (result == DIR_CCW) {
-            Serial.println("CounterClockWise");
-            ledSpeed = ledSpeed - 1;
-
-            if (ledSpeed <= 1) {
-                ledSpeed = 1;
-            }
-            playBeep();
-        }
+        processButtonInputs();
+        processClickWheelInputs();
 
         // if a LED toggle has been flagged :
         if (needToToggleLed) {
