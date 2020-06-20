@@ -98,6 +98,7 @@ void setup() {
         .setCorrection( Typical8mmPixel )
         .setDither(BRIGHTNESS < 255);
     FastLED.setBrightness( BRIGHTNESS );
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, 500);               // FastLED Power management set at 5V, 500mA.
 }
 
 void playMelody() {
