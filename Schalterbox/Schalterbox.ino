@@ -40,7 +40,7 @@ CRGB leds[NUM_LEDS];
 int internalLedState = LOW;
 int activeLedNumber = 0;
 int ledInc = 1;
-int ledSpeed = 5;
+int ledSpeed = 1000/60;
 
 byte red = 1;
 byte green = 1;
@@ -49,6 +49,22 @@ byte blue = 1;
 byte redFactor = 1;
 byte greenFactor = 1;
 byte blueFactor = 1;
+
+double redDeg = 0.0;
+double greenDeg = 0.0;
+double blueDeg = 0.0;
+
+double redSpeed = 0.1;
+double greenSpeed = 0.2;
+double blueSpeed = 0.3;
+
+double redDir = 1.0;
+double greenDir = 1.0;
+double blueDir = 1.0;
+
+bool redSelected = true;
+bool greenSelected = false;
+bool blueSelected = false;
 
 // notes in the melody:
 int melody[] = {
@@ -115,11 +131,21 @@ void loop()
     FastLED.clear();
 
     for (int i = 0; i < NUM_LEDS; i++) {
-      if (i == activeLedNumber) {
-        leds[i] = CRGB((red + i*2) * redFactor, (green + i*3) * greenFactor, (blue + i*4) * blueFactor);
-      } else {
-        leds[i] = CRGB::Red;
+      byte redValue = byte(abs(sin( (redDeg + i) / (PI * 2) ) * 255));
+      byte greenValue = byte(abs(sin( (greenDeg + i) / (PI * 2) ) * 255));
+      byte blueValue = byte(abs(sin( (blueDeg + i) / (PI * 2) ) * 255));
+
+      if(!redSelected) {
+        redValue = 0.0;
       }
+      if(!greenSelected) {
+        greenValue = 0.0;
+      }
+      if(!blueSelected) {
+        blueValue = 0.0;
+      }
+
+      leds[i] = CRGB(redValue, greenValue, blueValue);
     }
 
     red+=1;
@@ -127,48 +153,98 @@ void loop()
     blue+=3;
 
     FastLED.show();
+    FastLED.delay(ledSpeed);
 
-    for (int t = 0; t < 25; t++) {
-        FastLED.delay(ledSpeed);
-        bool needToToggleLed = false;
+    for (int i = 0; i < NUM_BUTTONS; i++)  {
+        // Update the Bounce instance :
+        buttons[i].update();
+        // If it fell, flag the need to toggle the LED
+        // if ( buttons[i].fell() ) {
+        //     String message = "Button on Pin " + BUTTON_PINS[i];
+        //     message = message + " was pressed";
+        //     Serial.println(message);
+        //     // needToToggleLed = true;
+        //     //ledInc *= -1;
+        // }
+    }
 
-        for (int i = 0; i < NUM_BUTTONS; i++)  {
-            // Update the Bounce instance :
-            buttons[i].update();
-            // If it fell, flag the need to toggle the LED
-            if ( buttons[i].fell() ) {
-                String message = "Button on Pin " + BUTTON_PINS[i];
-                message = message + " was pressed";
-                Serial.println(message);
-                needToToggleLed = true;
-                ledInc *= -1;
-            }
+    // BUTTON_RED_PIN
+    if ( buttons[1].fell()) {
+      redSelected = !redSelected;
+    }
+    // BUTTON_GREEN_PIN
+    if ( buttons[2].fell()) {
+      greenSelected = !greenSelected;
+    }
+    // BUTTON_BLUE_PIN
+    if ( buttons[3].fell()) {
+      blueSelected = !blueSelected;
+    }
+    // FORWARD_SWITCH_PIN
+    if (buttons[4].fell()) {
+      if (redSelected) {
+        redDir = redDir * -1.0;
+      }
+      if (greenSelected) {
+        greenDir = greenDir * -1.0;
+      }
+      if (blueSelected) {
+        blueDir = blueDir * -1.0;
+      }
+    }
+    if (buttons[5].fell()) {
+      if (redSelected) {
+        redDir = redDir * -1.0;
+      }
+      if (greenSelected) {
+        greenDir = greenDir * -1.0;
+      }
+      if (blueSelected) {
+        blueDir = blueDir * -1.0;
+      }
+    }
+
+    unsigned char result = r.process();
+    if (result == DIR_NONE) {
+        // do nothing
+    }
+    else if (result == DIR_CW) {
+        Serial.println("ClockWise");
+        if(redSelected) {
+          redSpeed += 0.1;
+        }
+        if(greenSelected) {
+          greenSpeed += 0.1;
+        }
+        if(blueSelected) {
+          blueSpeed += 0.1;
+        }
+    }
+    else if (result == DIR_CCW) {
+        Serial.println("CounterClockWise");
+        if(redSelected) {
+          redSpeed -= 0.1;
+        }
+        if(greenSelected) {
+          greenSpeed -= 0.1;
+        }
+        if(blueSelected) {
+          blueSpeed -= 0.1;
         }
 
-        unsigned char result = r.process();
-        if (result == DIR_NONE) {
-            // do nothing
+        if (redSpeed <= 0.1) {
+            redSpeed = 0.1;
         }
-        else if (result == DIR_CW) {
-            Serial.println("ClockWise");
-            ledSpeed = ledSpeed + 1;
+        if (greenSpeed <= 0.1) {
+            greenSpeed = 0.1;
         }
-        else if (result == DIR_CCW) {
-            Serial.println("CounterClockWise");
-            ledSpeed = ledSpeed - 1;
-
-            if (ledSpeed <= 1) {
-                ledSpeed = 1;
-            }
-        }
-
-        // if a LED toggle has been flagged :
-        if (needToToggleLed) {
-            // Toggle LED state :
-            internalLedState = !internalLedState;
-            digitalWrite(LED_PIN, internalLedState);
+        if (blueSpeed <= 0.1) {
+            blueSpeed = 0.1;
         }
     }
 
+    redDeg += redSpeed * redDir;
+    greenDeg += greenSpeed * greenDir;
+    blueDeg += blueSpeed * blueDir;
     activeLedNumber = (activeLedNumber + ledInc) % NUM_LEDS;
 }

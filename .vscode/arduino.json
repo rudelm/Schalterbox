@@ -2,5 +2,5 @@
     "sketch": "Schalterbox/Schalterbox.ino",
     "board": "arduino:avr:mega",
     "configuration": "cpu=atmega2560",
-    "port": "/dev/tty.usbmodem144201"
+    "port": "/dev/tty.usbmodem144101"
 }
