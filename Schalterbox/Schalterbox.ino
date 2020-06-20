@@ -91,6 +91,7 @@ void setup() {
     playMelody();
 
     delay(3000); // power-up safety delay
+    delay(1000); // power-up safety delay
     // It's important to set the color correction for your LED strip here,
     // so that colors can be more accurately rendered through the 'temperature' profiles
     FastLED.addLeds<CHIPSET, DATA_PIN, CLOCK_PIN, COLOR_ORDER>(leds, NUM_LEDS)
