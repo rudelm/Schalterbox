@@ -47,6 +47,7 @@ struct CRGB leds[NUM_LEDS];
 
 uint8_t max_bright = 128;                                     // Overall brightness definition. It can be changed on the fly.
 
+char logMessage[100];
 
 int internalLedState = LOW;
 int activeLedNumber = 0;
@@ -98,8 +99,7 @@ void setup() {
     delay(1000); // power-up safety delay
     // It's important to set the color correction for your LED strip here,
     // so that colors can be more accurately rendered through the 'temperature' profiles
-    FastLED.addLeds<CHIPSET, DATA_PIN, CLOCK_PIN, COLOR_ORDER>(leds, NUM_LEDS)
-        .setCorrection( Typical8mmPixel );
+    FastLED.addLeds<CHIPSET, DATA_PIN, CLOCK_PIN, COLOR_ORDER>(leds, NUM_LEDS);
     FastLED.setBrightness(max_bright);
     FastLED.setMaxPowerInVoltsAndMilliamps(5, 500);               // FastLED Power management set at 5V, 500mA.
 }
@@ -198,8 +198,33 @@ void processButtonInputs() {
             }
         }
 
-        if ( buttons[i].read() )
+        int currentButtonRead = buttons[i].read();
+        if ( currentButtonRead == HIGH )
         {
+            // buttons are pressed
+            switch (i) {
+                case ENCODER_BUTTON_ARRAY_POSITION:
+                    break;
+                case RED_SWITCH_ARRAY_POSITION:
+                    redPressed = false;
+                    break;
+                case GREEN_SWITCH_ARRAY_POSITION:
+                    greenPressed = false;
+                    break;
+                case BLUE_SWITCH_ARRAY_POSITION:
+                    bluePressed = false;
+                    break;
+                case FORWARD_SWITCH_ARRAY_POSITION:
+                    break;
+                case BACKWARD_SWITCH_ARRAY_POSITION:
+                    break;
+                case BUZZER_SWITCH_ARRAY_POSITION:
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            // buttons are not pressed
             switch (i) {
                 case ENCODER_BUTTON_ARRAY_POSITION:
                     break;
@@ -288,6 +313,8 @@ void loop()
     processClickWheelInputs();  
 
     fill_solid(leds, NUM_LEDS, CRGB(redValue, greenValue, blueValue));
+    sprintf(logMessage, "Current Colors: red %d green %d blue %d - Pressed keys: %d %d %d", redValue, greenValue, blueValue, redPressed, greenPressed, bluePressed);
+    Serial.println(logMessage);
 
     FastLED.show();
 }
