@@ -307,14 +307,29 @@ void processClickWheelInputs() {
     }
 }
 
+void printValues(int firstValue, int secondValue, int thirdValue) {
+    static int lastValue1 = 0;
+    static int lastValue2 = 0;
+    static int lastValue3 = 0;
+
+    if ( (firstValue != lastValue1) || (secondValue != lastValue2) || (thirdValue != lastValue3))  {
+        sprintf(logMessage, "Current values: first %d second %d third %d - Pressed keys: %d %d %d", firstValue, secondValue, thirdValue, redPressed, greenPressed, bluePressed);
+        Serial.println(logMessage);
+
+        // save the changed values
+        lastValue1 = firstValue;
+        lastValue2 = secondValue;
+        lastValue3 = thirdValue;
+    }
+}
+
 void loop()
 {
     processButtonInputs();
     processClickWheelInputs();  
 
     fill_solid(leds, NUM_LEDS, CRGB(redValue, greenValue, blueValue));
-    sprintf(logMessage, "Current Colors: red %d green %d blue %d - Pressed keys: %d %d %d", redValue, greenValue, blueValue, redPressed, greenPressed, bluePressed);
-    Serial.println(logMessage);
+    printValues(redValue, greenValue, blueValue);
 
     FastLED.show();
 }
