@@ -69,6 +69,8 @@ boolean buzzerEnabled = false;
 boolean redPressed = false;
 boolean greenPressed = false;
 boolean bluePressed = false;
+boolean forwardPressed = false;
+boolean backwardPressed = false;
 
 Rotary r = Rotary(ENCODER_PIN_A, ENCODER_PIN_B);
 Bounce * buttons = new Bounce[NUM_BUTTONS];
@@ -136,6 +138,18 @@ void resetColors() {
     blueValue = 0;
 }
 
+void setColorRgb(int red, int green, int blue) {
+    CRGB color = CRGB(red, green, blue);
+
+    fill_solid(leds, NUM_LEDS, color);
+}
+
+void setColorHsv(int hue, int saturation, int value) {
+    CHSV color = CHSV(hue, saturation, value);
+
+    fill_solid(leds, NUM_LEDS, color);
+}
+
 void processButtonInputs() {
     for (int i = 0; i < NUM_BUTTONS; i++) {
         // Update the Bounce instance :
@@ -154,8 +168,10 @@ void processButtonInputs() {
                     bluePressed = false;
                     break;
                 case FORWARD_SWITCH_ARRAY_POSITION:
+                    forwardPressed = false;
                     break;
                 case BACKWARD_SWITCH_ARRAY_POSITION:
+                    backwardPressed = false;
                     break;
                 case BUZZER_SWITCH_ARRAY_POSITION:
                     Serial.println("Buzzer was enabled.");
@@ -186,8 +202,11 @@ void processButtonInputs() {
                     bluePressed = true;
                     break;
                 case FORWARD_SWITCH_ARRAY_POSITION:
+                    forwardPressed = true;
                     break;
                 case BACKWARD_SWITCH_ARRAY_POSITION:
+                    
+                    backwardPressed = true;
                     break;
                 case BUZZER_SWITCH_ARRAY_POSITION:
                     Serial.println("Buzzer was disabled.");
@@ -201,7 +220,7 @@ void processButtonInputs() {
         int currentButtonRead = buttons[i].read();
         if ( currentButtonRead == HIGH )
         {
-            // buttons are pressed
+            // buttons are not pressed
             switch (i) {
                 case ENCODER_BUTTON_ARRAY_POSITION:
                     break;
@@ -215,6 +234,7 @@ void processButtonInputs() {
                     bluePressed = false;
                     break;
                 case FORWARD_SWITCH_ARRAY_POSITION:
+                    forwardPressed = false;
                     break;
                 case BACKWARD_SWITCH_ARRAY_POSITION:
                     break;
@@ -224,7 +244,7 @@ void processButtonInputs() {
                     break;
             }
         } else {
-            // buttons are not pressed
+            // buttons are pressed
             switch (i) {
                 case ENCODER_BUTTON_ARRAY_POSITION:
                     break;
@@ -238,8 +258,10 @@ void processButtonInputs() {
                     bluePressed = true;
                     break;
                 case FORWARD_SWITCH_ARRAY_POSITION:
+                    forwardPressed = true;
                     break;
                 case BACKWARD_SWITCH_ARRAY_POSITION:
+                    backwardPressed = true;
                     break;
                 case BUZZER_SWITCH_ARRAY_POSITION:
                     break;
@@ -313,7 +335,7 @@ void printValues(int firstValue, int secondValue, int thirdValue) {
     static int lastValue3 = 0;
 
     if ( (firstValue != lastValue1) || (secondValue != lastValue2) || (thirdValue != lastValue3))  {
-        sprintf(logMessage, "Current values: first %d second %d third %d - Pressed keys: %d %d %d", firstValue, secondValue, thirdValue, redPressed, greenPressed, bluePressed);
+        sprintf(logMessage, "Current values: forward %d, backward %d - first %d second %d third %d - Pressed keys: %d %d %d", forwardPressed, backwardPressed, firstValue, secondValue, thirdValue, redPressed, greenPressed, bluePressed);
         Serial.println(logMessage);
 
         // save the changed values
@@ -328,7 +350,12 @@ void loop()
     processButtonInputs();
     processClickWheelInputs();  
 
-    fill_solid(leds, NUM_LEDS, CRGB(redValue, greenValue, blueValue));
+    if (forwardPressed) {
+        setColorRgb(redValue, greenValue, blueValue);
+    }
+    else if (backwardPressed) {
+        setColorHsv(redValue, greenValue, blueValue);
+    }
     printValues(redValue, greenValue, blueValue);
 
     FastLED.show();
