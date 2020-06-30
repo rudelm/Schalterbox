@@ -310,6 +310,12 @@ void processClickWheelInputs() {
                 blueValue = 255;
             }
         }
+
+        if ((max_bright > 0) && (max_bright < (255 - increment))) {
+            max_bright += increment;
+        } else {
+            max_bright = 255;
+        }
     }
     else if (result == DIR_CCW) {
         Serial.println("CounterClockWise");
@@ -335,6 +341,12 @@ void processClickWheelInputs() {
                 blueValue = 0;
             }
         }
+
+        if ((max_bright > increment) && (max_bright <= 255)) {
+            max_bright -= increment;
+        } else {
+            max_bright = 1;
+        }
     }
 }
 
@@ -358,6 +370,8 @@ void loop()
 {
     processButtonInputs();
     processClickWheelInputs();  
+
+    FastLED.setBrightness(max_bright);
 
     if (forwardPressed) {
         //setColorRgb(redValue, greenValue, blueValue);
