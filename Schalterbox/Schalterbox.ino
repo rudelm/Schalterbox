@@ -45,7 +45,7 @@ const uint8_t BUTTON_PINS[NUM_BUTTONS] = {ENCODER_PIN_BUTTON, BUTTON_RED_PIN, BU
 #define COLOR_ORDER RGB
 struct CRGB leds[NUM_LEDS];
 
-uint8_t max_bright = 128;                                     // Overall brightness definition. It can be changed on the fly.
+uint8_t max_bright = 20;                                     // Overall brightness definition. It can be changed on the fly.
 
 char logMessage[100];
 
@@ -72,6 +72,7 @@ boolean greenPressed = false;
 boolean bluePressed = false;
 boolean forwardPressed = false;
 boolean backwardPressed = false;
+boolean togglePride = false;
 
 Rotary r = Rotary(ENCODER_PIN_A, ENCODER_PIN_B);
 Bounce * buttons = new Bounce[NUM_BUTTONS];
@@ -152,11 +153,55 @@ void setColorHsv(int hue, int saturation, int value) {
 }
 
 void rainbowAnimation(int hue, int speed) {
-    int startHue = hue + speed;
+    int startHue = millis() * (128-hue)/255;
 
-    byte hueChange = 255 / NUM_LEDS;
+    byte hueChange = speed / NUM_LEDS;
 
     fill_rainbow(leds, NUM_LEDS, startHue, hueChange);
+}
+
+// This function draws rainbows with an ever-changing,
+// widely-varying set of parameters.
+// taken from https://gist.github.com/kriegsman/964de772d64c502760e5
+void pride() 
+{
+  static uint16_t sPseudotime = 0;
+  static uint16_t sLastMillis = 0;
+  static uint16_t sHue16 = 0;
+ 
+  uint8_t sat8 = beatsin88( 87, 220, 250);
+  uint8_t brightdepth = beatsin88( 341, 96, 224);
+  uint16_t brightnessthetainc16 = beatsin88( 203, (25 * 256), (40 * 256));
+  uint8_t msmultiplier = beatsin88(147, 23, 60);
+
+  uint16_t hue16 = sHue16;//gHue * 256;
+  uint16_t hueinc16 = beatsin88(113, 1, 3000);
+  
+  uint16_t ms = millis();
+  uint16_t deltams = ms - sLastMillis ;
+  sLastMillis  = ms;
+  sPseudotime += deltams * msmultiplier;
+  sHue16 += deltams * beatsin88( 400, 5,9);
+  uint16_t brightnesstheta16 = sPseudotime;
+  
+  for( uint16_t i = 0 ; i < NUM_LEDS; i++) {
+    hue16 += hueinc16;
+    uint8_t hue8 = hue16 / 256;
+
+    brightnesstheta16  += brightnessthetainc16;
+    uint16_t b16 = sin16( brightnesstheta16  ) + 32768;
+
+    uint16_t bri16 = (uint32_t)((uint32_t)b16 * (uint32_t)b16) / 65536;
+    uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;
+    bri8 += (255 - brightdepth);
+    
+    CRGB newcolor = CHSV( hue8, sat8, bri8);
+    
+    uint16_t pixelnumber = i;
+    pixelnumber = (NUM_LEDS-1) - pixelnumber;
+    
+    nblend( leds[pixelnumber], newcolor, 64);
+  }
 }
 
 void processButtonInputs() {
@@ -312,10 +357,10 @@ void processClickWheelInputs() {
         }
 
         if (!redPressed && !greenPressed && !bluePressed) {
-            if ((max_bright > 0) && (max_bright < (255 - increment))) {
+            if ((max_bright > 0) && (max_bright < (20 - increment))) {
                 max_bright += increment;
             } else {
-                max_bright = 255;
+                max_bright = 20;
             }
         }
     }
@@ -345,7 +390,7 @@ void processClickWheelInputs() {
         }
 
         if (!redPressed && !greenPressed && !bluePressed) {
-            if ((max_bright > increment) && (max_bright <= 255)) {
+            if ((max_bright > increment) && (max_bright <= 20)) {
                 max_bright -= increment;
             } else {
                 max_bright = 1;
@@ -378,8 +423,16 @@ void loop()
     FastLED.setBrightness(max_bright);
 
     if (forwardPressed) {
+        if (bluePressed) {
+            togglePride = !togglePride;
+        }
+
+        if (togglePride) {
+            pride();
+        } else {
+            rainbowAnimation(redValue, greenValue);
+        }
         //setColorRgb(redValue, greenValue, blueValue);
-        rainbowAnimation(redValue, greenValue);
     }
     else if (backwardPressed) {
         setColorHsv(redValue, greenValue, blueValue);
