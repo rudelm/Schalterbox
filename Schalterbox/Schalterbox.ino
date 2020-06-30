@@ -311,10 +311,12 @@ void processClickWheelInputs() {
             }
         }
 
-        if ((max_bright > 0) && (max_bright < (255 - increment))) {
-            max_bright += increment;
-        } else {
-            max_bright = 255;
+        if (!redPressed && !greenPressed && !bluePressed) {
+            if ((max_bright > 0) && (max_bright < (255 - increment))) {
+                max_bright += increment;
+            } else {
+                max_bright = 255;
+            }
         }
     }
     else if (result == DIR_CCW) {
@@ -342,10 +344,12 @@ void processClickWheelInputs() {
             }
         }
 
-        if ((max_bright > increment) && (max_bright <= 255)) {
-            max_bright -= increment;
-        } else {
-            max_bright = 1;
+        if (!redPressed && !greenPressed && !bluePressed) {
+            if ((max_bright > increment) && (max_bright <= 255)) {
+                max_bright -= increment;
+            } else {
+                max_bright = 1;
+            }
         }
     }
 }
