@@ -54,6 +54,7 @@ int activeLedNumber = 0;
 int redValue = 0;
 int greenValue = 0;
 int blueValue = 0;
+int increment = 10;
 
 // notes in the melody:
 int melody[] = {
@@ -148,6 +149,14 @@ void setColorHsv(int hue, int saturation, int value) {
     CHSV color = CHSV(hue, saturation, value);
 
     fill_solid(leds, NUM_LEDS, color);
+}
+
+void rainbowAnimation(int hue, int speed) {
+    int startHue = hue + speed;
+
+    byte hueChange = 255 / NUM_LEDS;
+
+    fill_rainbow(leds, NUM_LEDS, startHue, hueChange);
 }
 
 void processButtonInputs() {
@@ -282,21 +291,21 @@ void processClickWheelInputs() {
         playBeep();
         if (redPressed) {
             if ((redValue >= 0) && (redValue < 255)) {
-                redValue += 1;
+                redValue += increment;
             } else {
                 redValue = 255;
             }
         }
         if (greenPressed) {
             if ((greenValue >= 0) && (greenValue < 255)) {
-                greenValue += 1;
+                greenValue += increment;
             } else {
                 greenValue = 255;
             }
         }
         if (bluePressed) {
             if ((blueValue >= 0) && (blueValue < 255)) {
-                blueValue += 1;
+                blueValue += increment;
             } else {
                 blueValue = 255;
             }
@@ -307,21 +316,21 @@ void processClickWheelInputs() {
         playBeep();
         if (redPressed) {
             if ((redValue > 0) && (redValue <= 255)) {
-                redValue -= 1;
+                redValue -= increment;
             } else {
                 redValue = 0;
             }
         }
         if (greenPressed) {
             if ((greenValue > 0) && (greenValue <= 255)) {
-                greenValue -= 1;
+                greenValue -= increment;
             } else {
                 greenValue = 0;
             }
         }
         if (bluePressed) {
             if ((blueValue > 0) && (blueValue <= 255)) {
-                blueValue -= 1;
+                blueValue -= increment;
             } else {
                 blueValue = 0;
             }
@@ -351,7 +360,8 @@ void loop()
     processClickWheelInputs();  
 
     if (forwardPressed) {
-        setColorRgb(redValue, greenValue, blueValue);
+        //setColorRgb(redValue, greenValue, blueValue);
+        rainbowAnimation(redValue, greenValue);
     }
     else if (backwardPressed) {
         setColorHsv(redValue, greenValue, blueValue);
