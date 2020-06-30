@@ -49,6 +49,10 @@ uint8_t max_bright = 20;                                     // Overall brightne
 
 char logMessage[100];
 
+long lastTime = 0;
+long minutes = 0;
+long sleepTime = 5;
+
 int internalLedState = LOW;
 int activeLedNumber = 0;
 int redValue = 0;
@@ -132,6 +136,9 @@ void playBeep() {
     if (buzzerEnabled) {
         tone(BUZZER_PIN, 1000, 100);
     }
+
+    // reset power saving on hardware change
+    minutes = 0;
 }
 
 void resetColors() {
@@ -158,6 +165,17 @@ void rainbowAnimation(int hue, int speed) {
     byte hueChange = speed / NUM_LEDS;
 
     fill_rainbow(leds, NUM_LEDS, startHue, hueChange);
+}
+
+void sleepToBatterySave() {
+    if (millis() - lastTime > 60000) {
+        minutes ++;
+        lastTime = millis();
+    }
+
+    if (minutes >= sleepTime) {
+        max_bright = 0;
+    }
 }
 
 // This function draws rainbows with an ever-changing,
@@ -440,4 +458,6 @@ void loop()
     printValues(redValue, greenValue, blueValue);
 
     FastLED.show();
+
+    sleepToBatterySave();
 }
