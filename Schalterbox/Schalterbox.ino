@@ -138,7 +138,7 @@ void checkForAnimationToggle() {
   // ENCODER_PIN_BUTTON
   if (buttons[0].fell()) {
     animationMode += 1;
-    if (animationMode > 1) {
+    if (animationMode > 3) {
       animationMode = 0;
     }
   }
@@ -331,6 +331,76 @@ void animate1() {
   }
 }
 
+void animate2() {
+  FastLED.clear();
+
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    byte redValue = byte(redAmount);
+
+    leds[i] = CHSV(redValue, 255, 255);
+  }
+
+  redAmount = redAmount + redSpeed;
+  if (redAmount > 255) {
+    redAmount = 0;
+  }
+
+  FastLED.show();
+  FastLED.delay(ledSpeed);
+
+  updateButtons();
+  checkForAnimationToggle();
+  checkForRGBDips();
+
+  unsigned char result = r.process();
+  if (result == DIR_NONE) {
+      // do nothing
+  } else if (result == DIR_CW) {
+    redSpeed += 0.1;
+  } else if (result == DIR_CCW) {
+    redSpeed -= 0.1;
+    if (redSpeed <= 0.1) {
+        redSpeed = 0.1;
+    }
+  }
+}
+
+void animate3() {
+  FastLED.clear();
+
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    byte redValue = byte(redAmount + i*256 / NUM_LEDS);
+
+    leds[i] = CHSV(redValue, 255, 255);
+  }
+
+  redAmount = redAmount + redSpeed;
+  if (redAmount > 255) {
+    redAmount = 0;
+  }
+
+  FastLED.show();
+  FastLED.delay(ledSpeed);
+
+  updateButtons();
+  checkForAnimationToggle();
+  checkForRGBDips();
+
+  unsigned char result = r.process();
+  if (result == DIR_NONE) {
+      // do nothing
+  } else if (result == DIR_CW) {
+    redSpeed += 0.1;
+  } else if (result == DIR_CCW) {
+    redSpeed -= 0.1;
+    if (redSpeed <= 0.1) {
+        redSpeed = 0.1;
+    }
+  }
+}
+
 void loop()
 {
   if (animationMode == 0) {
@@ -338,5 +408,11 @@ void loop()
   }
   if (animationMode == 1) {
     animate1();
+  }
+  if (animationMode == 2) {
+    animate2();
+  }
+  if (animationMode == 3) {
+    animate3();
   }
 }
