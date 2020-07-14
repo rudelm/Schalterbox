@@ -130,6 +130,9 @@ void setup() {
 
 void loop()
 {
+  processButtonInputs();
+  processClickWheelInputs(); 
+
   if (animationMode == 0) {
     animate0();
   }
@@ -405,9 +408,6 @@ void animate0() {
   FastLED.show();
   FastLED.delay(ledSpeed);
 
-  processButtonInputs();
-  processClickWheelInputs();  
-
   redDeg += redSpeed * redDir;
   greenDeg += greenSpeed * greenDir;
   blueDeg += blueSpeed * blueDir;
@@ -438,10 +438,7 @@ void animate1() {
   FastLED.show();
   FastLED.delay(ledSpeed);
 
-  processButtonInputs();
-  processClickWheelInputs();  
-
-  // needs refactoring in hardware handling method 
+  // needs refactoring in hardware handling method
   unsigned char result = r.process();
   if (result == DIR_NONE) {
       // do nothing
@@ -506,9 +503,6 @@ void animate2() {
 
   FastLED.show();
   FastLED.delay(ledSpeed);
-
-  processButtonInputs();
-  processClickWheelInputs();  
 }
 
 void animate3() {
@@ -527,7 +521,4 @@ void animate3() {
 
   FastLED.show();
   FastLED.delay(ledSpeed);
-
-  processButtonInputs();
-  processClickWheelInputs();  
 }
