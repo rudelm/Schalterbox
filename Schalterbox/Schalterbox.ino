@@ -133,7 +133,7 @@ void setup() {
 void loop()
 {
   processButtonInputs();
-  processClickWheelInputs(); 
+  processClickWheelInputs();
 
   if (animationMode == 0) {
     animate0();
@@ -151,7 +151,6 @@ void loop()
   sleepToBatterySave();
   FastLED.setBrightness(max_bright);
 }
-
 
 // Button, Switches, Clickwheel handling
 void processButtonInputs() {
@@ -253,7 +252,7 @@ void processButtonInputs() {
           case BACKWARD_SWITCH_ARRAY_POSITION:
             break;
           case BUZZER_SWITCH_ARRAY_POSITION:
-            buzzerEnabled = true;
+            buzzerEnabled = false;
             break;
           default:
             break;
