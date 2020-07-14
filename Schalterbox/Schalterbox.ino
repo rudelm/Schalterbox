@@ -45,7 +45,8 @@ const uint8_t BUTTON_PINS[NUM_BUTTONS] = {ENCODER_PIN_BUTTON, BUTTON_RED_PIN, BU
 #define COLOR_ORDER RGB
 CRGB leds[NUM_LEDS];
 
-uint8_t max_bright = 20;                                     // Overall brightness definition. It can be changed on the fly.
+uint8_t maxBrightDefault = 20;
+uint8_t max_bright = maxBrightDefault;                                     // Overall brightness definition. It can be changed on the fly.
 
 char logMessage[100];
 
@@ -104,6 +105,7 @@ void playBeep();
 
 void setup() {
     Serial.begin(115200);
+    r.begin(true);
 
     for (int i = 0; i < NUM_BUTTONS; i++) {
         buttons[i].attach( BUTTON_PINS[i] , INPUT_PULLUP  );       //setup the bounce instance for the current button
@@ -285,60 +287,109 @@ void processClickWheelInputs() {
   unsigned char result = r.process();
   if (result == DIR_NONE) {
       // do nothing
-      Serial.println("Chilling");
   }
   else if (result == DIR_CW) {
     Serial.println("ClockWise");
     playBeep();
-    // animate0 requires these settings
-    if(redSelected) {
-      redSpeed += 0.1;
-    }
-    if(greenSelected) {
-      greenSpeed += 0.1;
-    }
-    if(blueSelected) {
-      blueSpeed += 0.1;
-    }
-
-    // animate 2 and 3 require this setting
-    if(!redSelected && !greenSelected && !blueSelected)
-    {
-      redSpeed += 0.1;
-    }
+    changeClockwiseSettings();
   }
   else if (result == DIR_CCW) {
     Serial.println("CounterClockWise");
     playBeep();
-    // animate0 requires these settings
-    if(redSelected) {
-      redSpeed -= 0.1;
-    }
-    if(greenSelected) {
-      greenSpeed -= 0.1;
-    }
-    if(blueSelected) {
-      blueSpeed -= 0.1;
-    }
+    changeCounterClockWiseSettings();
+  }
+}
 
-    if (redSpeed <= 0.1) {
-        redSpeed = 0.1;
-    }
-    if (greenSpeed <= 0.1) {
-        greenSpeed = 0.1;
-    }
-    if (blueSpeed <= 0.1) {
-        blueSpeed = 0.1;
-    }
+void changeClockwiseSettings() {
+  switch (animationMode) {
+    case 0:
+      if(redSelected) {
+        redSpeed += 0.1;
+      }
+      if(greenSelected) {
+        greenSpeed += 0.1;
+      }
+      if(blueSelected) {
+        blueSpeed += 0.1;
+      }
+      break;
+    case 1:
+      if(redSelected) {
+        redAmount += 16.0;
+      }
+      if(greenSelected) {
+        greenAmount += 16.0;
+      }
+      if(blueSelected) {
+        blueAmount += 16.0;
+      }
 
-    // animate 2 and 3 require this setting
-    if(!redSelected && !greenSelected && !blueSelected)
-    {
+      if (redAmount > 255.0) {
+        redAmount = 255.0;
+      }
+      if (greenAmount > 255.0) {
+        greenAmount = 255.0;
+      }
+      if (blueAmount > 255.0) {
+        blueAmount = 255.0;
+      }
+      break;
+    default:
+      redSpeed += 0.1;
+      break;
+  }
+}
+
+void changeCounterClockWiseSettings() {
+  switch (animationMode) {
+    case 0:
+      if(redSelected) {
+        redSpeed -= 0.1;
+      }
+      if(greenSelected) {
+        greenSpeed -= 0.1;
+      }
+      if(blueSelected) {
+        blueSpeed -= 0.1;
+      }
+
+      if (redSpeed <= 0.1) {
+          redSpeed = 0.1;
+      }
+      if (greenSpeed <= 0.1) {
+          greenSpeed = 0.1;
+      }
+      if (blueSpeed <= 0.1) {
+          blueSpeed = 0.1;
+      }
+      break;
+    case 1:
+      if(redSelected) {
+        redAmount -= 16.0;
+      }
+      if(greenSelected) {
+        greenAmount -= 16.0;
+      }
+      if(blueSelected) {
+        blueAmount -= 16.0;
+      }
+
+      if (redAmount < 0.0) {
+          redAmount = 0.0;
+      }
+      if (greenAmount < 0.0) {
+          greenAmount = 0.0;
+      }
+      if (blueAmount < 0.0) {
+          blueAmount = 0.0;
+      }
+      break;
+    default:
       redSpeed -= 0.1;
       if (redSpeed <= 0.1) {
           redSpeed = 0.1;
       }
-    }
+      break;
   }
 }
 
@@ -369,6 +420,7 @@ void playBeep() {
 
   // reset power saving on hardware change
   minutes = 0;
+  max_bright = maxBrightDefault;
 }
 
 // Battery management
@@ -437,54 +489,6 @@ void animate1() {
 
   FastLED.show();
   FastLED.delay(ledSpeed);
-
-  // needs refactoring in hardware handling method
-  unsigned char result = r.process();
-  if (result == DIR_NONE) {
-      // do nothing
-  } else if (result == DIR_CW) {
-    Serial.println("ClockWise");
-    if(redSelected) {
-      redAmount += 16.0;
-    }
-    if(greenSelected) {
-      greenAmount += 16.0;
-    }
-    if(blueSelected) {
-      blueAmount += 16.0;
-    }
-
-    if (redAmount > 255.0) {
-      redAmount = 255.0;
-    }
-    if (greenAmount > 255.0) {
-      greenAmount = 255.0;
-    }
-    if (blueAmount > 255.0) {
-      blueAmount = 255.0;
-    }
-  } else if (result == DIR_CCW) {
-    Serial.println("CounterClockWise");
-    if(redSelected) {
-      redAmount -= 16.0;
-    }
-    if(greenSelected) {
-      greenAmount -= 16.0;
-    }
-    if(blueSelected) {
-      blueAmount -= 16.0;
-    }
-
-    if (redAmount < 0.0) {
-        redAmount = 0.0;
-    }
-    if (greenAmount < 0.0) {
-        greenAmount = 0.0;
-    }
-    if (blueAmount < 0.0) {
-        blueAmount = 0.0;
-    }
-  }
 }
 
 void animate2() {
