@@ -113,6 +113,7 @@ void setup() {
     buttons[BUZZER_SWITCH_ARRAY_POSITION].update();
     int buzzerState = buttons[BUZZER_SWITCH_ARRAY_POSITION].read();
     if ( buzzerState == LOW ) {
+      buzzerEnabled = true;
     } else {
         buzzerEnabled = false;
     }
@@ -235,41 +236,43 @@ void processButtonInputs() {
       // buttons are not pressed
       switch (i) {
           case ENCODER_BUTTON_ARRAY_POSITION:
-              break;
+            break;
           case RED_SWITCH_ARRAY_POSITION:
-              break;
+            break;
           case GREEN_SWITCH_ARRAY_POSITION:
-              break;
+            break;
           case BLUE_SWITCH_ARRAY_POSITION:
-              break;
+            break;
           case FORWARD_SWITCH_ARRAY_POSITION:
-              break;
+            break;
           case BACKWARD_SWITCH_ARRAY_POSITION:
-              break;
+            break;
           case BUZZER_SWITCH_ARRAY_POSITION:
-              break;
+            buzzerEnabled = true;
+            break;
           default:
-              break;
+            break;
       }
     } else {
       // buttons are pressed
       switch (i) {
           case ENCODER_BUTTON_ARRAY_POSITION:
-              break;
+            break;
           case RED_SWITCH_ARRAY_POSITION:
-              break;
+            break;
           case GREEN_SWITCH_ARRAY_POSITION:
-              break;
+            break;
           case BLUE_SWITCH_ARRAY_POSITION:
-              break;
+            break;
           case FORWARD_SWITCH_ARRAY_POSITION:
-              break;
+            break;
           case BACKWARD_SWITCH_ARRAY_POSITION:
-              break;
+            break;
           case BUZZER_SWITCH_ARRAY_POSITION:
-              break;
+            buzzerEnabled = true;
+            break;
           default:
-              break;
+            break;
       }
     }
   }
@@ -279,9 +282,11 @@ void processClickWheelInputs() {
   unsigned char result = r.process();
   if (result == DIR_NONE) {
       // do nothing
+      Serial.println("Chilling");
   }
   else if (result == DIR_CW) {
     Serial.println("ClockWise");
+    playBeep();
     // animate0 requires these settings
     if(redSelected) {
       redSpeed += 0.1;
@@ -298,11 +303,10 @@ void processClickWheelInputs() {
     {
       redSpeed += 0.1;
     }
-
-    playBeep();
   }
   else if (result == DIR_CCW) {
     Serial.println("CounterClockWise");
+    playBeep();
     // animate0 requires these settings
     if(redSelected) {
       redSpeed -= 0.1;
@@ -332,8 +336,6 @@ void processClickWheelInputs() {
           redSpeed = 0.1;
       }
     }
-    
-    playBeep();
   }
 }
 
@@ -439,6 +441,7 @@ void animate1() {
   processButtonInputs();
   processClickWheelInputs();  
 
+  // needs refactoring in hardware handling method 
   unsigned char result = r.process();
   if (result == DIR_NONE) {
       // do nothing
