@@ -43,7 +43,7 @@ const uint8_t BUTTON_PINS[NUM_BUTTONS] = {ENCODER_PIN_BUTTON, BUTTON_RED_PIN, BU
 #define NUM_LEDS    12
 #define CHIPSET     WS2801
 #define COLOR_ORDER RGB
-struct CRGB leds[NUM_LEDS];
+CRGB leds[NUM_LEDS];
 
 uint8_t max_bright = 20;                                     // Overall brightness definition. It can be changed on the fly.
 
@@ -55,10 +55,34 @@ long sleepTime = 5;
 
 int internalLedState = LOW;
 int activeLedNumber = 0;
-int redValue = 0;
-int greenValue = 0;
-int blueValue = 0;
-int increment = 10;
+int ledInc = 1;
+int ledSpeed = 1000/60;
+
+byte animationMode = 0;
+
+byte redFactor = 1;
+byte greenFactor = 1;
+byte blueFactor = 1;
+
+double redAmount = 255.0;
+double greenAmount = 255.0;
+double blueAmount = 255.0;
+
+double redDeg = 0.0;
+double greenDeg = 0.0;
+double blueDeg = 0.0;
+
+double redSpeed = 0.1;
+double greenSpeed = 0.2;
+double blueSpeed = 0.3;
+
+double redDir = 1.0;
+double greenDir = 1.0;
+double blueDir = 1.0;
+
+bool redSelected = true;
+bool greenSelected = false;
+bool blueSelected = false;
 
 // notes in the melody:
 int melody[] = {
@@ -140,6 +164,294 @@ void playBeep() {
     // reset power saving on hardware change
     minutes = 0;
 }
+
+void updateButtons() {
+  for (int i = 0; i < NUM_BUTTONS; i++)  {
+    buttons[i].update();
+  }
+}
+
+void checkForAnimationToggle() {
+  // ENCODER_PIN_BUTTON
+  if (buttons[0].fell()) {
+    animationMode += 1;
+    if (animationMode > 3) {
+      animationMode = 0;
+    }
+  }
+}
+
+void checkForRGBDips() {
+  // BUTTON_RED_PIN
+  if (buttons[1].fell()) {
+    redSelected = !redSelected;
+  }
+  // BUTTON_GREEN_PIN
+  if (buttons[2].fell()) {
+    greenSelected = !greenSelected;
+  }
+  // BUTTON_BLUE_PIN
+  if (buttons[3].fell()) {
+    blueSelected = !blueSelected;
+  }
+}
+
+
+void animate0() {
+  FastLED.clear();
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    byte redValue = byte(abs(sin( (redDeg + i) / (PI * 2) ) * 255));
+    byte greenValue = byte(abs(sin( (greenDeg + i) / (PI * 2) ) * 255));
+    byte blueValue = byte(abs(sin( (blueDeg + i) / (PI * 2) ) * 255));
+
+    if(!redSelected) {
+      redValue = 0.0;
+    }
+    if(!greenSelected) {
+      greenValue = 0.0;
+    }
+    if(!blueSelected) {
+      blueValue = 0.0;
+    }
+
+    leds[i] = CRGB(redValue, greenValue, blueValue);
+  }
+
+  FastLED.show();
+  FastLED.delay(ledSpeed);
+
+  updateButtons();
+  checkForAnimationToggle();
+  checkForRGBDips();
+
+  // FORWARD_SWITCH_PIN
+  if (buttons[4].fell()) {
+    if (redSelected) {
+      redDir = redDir * -1.0;
+    }
+    if (greenSelected) {
+      greenDir = greenDir * -1.0;
+    }
+    if (blueSelected) {
+      blueDir = blueDir * -1.0;
+    }
+  }
+  if (buttons[5].fell()) {
+    if (redSelected) {
+      redDir = redDir * -1.0;
+    }
+    if (greenSelected) {
+      greenDir = greenDir * -1.0;
+    }
+    if (blueSelected) {
+      blueDir = blueDir * -1.0;
+    }
+  }
+
+  unsigned char result = r.process();
+  if (result == DIR_NONE) {
+      // do nothing
+  } else if (result == DIR_CW) {
+    Serial.println("ClockWise");
+    if(redSelected) {
+      redSpeed += 0.1;
+    }
+    if(greenSelected) {
+      greenSpeed += 0.1;
+    }
+    if(blueSelected) {
+      blueSpeed += 0.1;
+    }
+  } else if (result == DIR_CCW) {
+    Serial.println("CounterClockWise");
+    if(redSelected) {
+      redSpeed -= 0.1;
+    }
+    if(greenSelected) {
+      greenSpeed -= 0.1;
+    }
+    if(blueSelected) {
+      blueSpeed -= 0.1;
+    }
+
+    if (redSpeed <= 0.1) {
+        redSpeed = 0.1;
+    }
+    if (greenSpeed <= 0.1) {
+        greenSpeed = 0.1;
+    }
+    if (blueSpeed <= 0.1) {
+        blueSpeed = 0.1;
+    }
+  }
+
+  redDeg += redSpeed * redDir;
+  greenDeg += greenSpeed * greenDir;
+  blueDeg += blueSpeed * blueDir;
+  activeLedNumber = (activeLedNumber + ledInc) % NUM_LEDS;
+}
+
+void animate1() {
+  FastLED.clear();
+
+  byte redValue = byte(redAmount);
+  byte greenValue = byte(greenAmount);
+  byte blueValue = byte(blueAmount);
+
+  if(!redSelected) {
+    redValue = 0.0;
+  }
+  if(!greenSelected) {
+    greenValue = 0.0;
+  }
+  if(!blueSelected) {
+    blueValue = 0.0;
+  }
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = CRGB(redValue, greenValue, blueValue);
+  }
+
+  FastLED.show();
+  FastLED.delay(ledSpeed);
+
+  updateButtons();
+  checkForAnimationToggle();
+  checkForRGBDips();
+
+  unsigned char result = r.process();
+  if (result == DIR_NONE) {
+      // do nothing
+  } else if (result == DIR_CW) {
+    Serial.println("ClockWise");
+    if(redSelected) {
+      redAmount += 16.0;
+    }
+    if(greenSelected) {
+      greenAmount += 16.0;
+    }
+    if(blueSelected) {
+      blueAmount += 16.0;
+    }
+
+    if (redAmount > 255.0) {
+      redAmount = 255.0;
+    }
+    if (greenAmount > 255.0) {
+      greenAmount = 255.0;
+    }
+    if (blueAmount > 255.0) {
+      blueAmount = 255.0;
+    }
+  } else if (result == DIR_CCW) {
+    Serial.println("CounterClockWise");
+    if(redSelected) {
+      redAmount -= 16.0;
+    }
+    if(greenSelected) {
+      greenAmount -= 16.0;
+    }
+    if(blueSelected) {
+      blueAmount -= 16.0;
+    }
+
+    if (redAmount < 0.0) {
+        redAmount = 0.0;
+    }
+    if (greenAmount < 0.0) {
+        greenAmount = 0.0;
+    }
+    if (blueAmount < 0.0) {
+        blueAmount = 0.0;
+    }
+  }
+}
+
+void animate2() {
+  FastLED.clear();
+
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    byte redValue = byte(redAmount);
+
+    leds[i] = CHSV(redValue, 255, 255);
+  }
+
+  redAmount = redAmount + redSpeed;
+  if (redAmount > 255) {
+    redAmount = 0;
+  }
+
+  FastLED.show();
+  FastLED.delay(ledSpeed);
+
+  updateButtons();
+  checkForAnimationToggle();
+  checkForRGBDips();
+
+  unsigned char result = r.process();
+  if (result == DIR_NONE) {
+      // do nothing
+  } else if (result == DIR_CW) {
+    redSpeed += 0.1;
+  } else if (result == DIR_CCW) {
+    redSpeed -= 0.1;
+    if (redSpeed <= 0.1) {
+        redSpeed = 0.1;
+    }
+  }
+}
+
+void animate3() {
+  FastLED.clear();
+
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    byte redValue = byte(redAmount + i*256 / NUM_LEDS);
+
+    leds[i] = CHSV(redValue, 255, 255);
+  }
+
+  redAmount = redAmount + redSpeed;
+  if (redAmount > 255) {
+    redAmount = 0;
+  }
+
+  FastLED.show();
+  FastLED.delay(ledSpeed);
+
+  updateButtons();
+  checkForAnimationToggle();
+  checkForRGBDips();
+
+  unsigned char result = r.process();
+  if (result == DIR_NONE) {
+      // do nothing
+  } else if (result == DIR_CW) {
+    redSpeed += 0.1;
+  } else if (result == DIR_CCW) {
+    redSpeed -= 0.1;
+    if (redSpeed <= 0.1) {
+        redSpeed = 0.1;
+    }
+  }
+}
+
+void loop()
+{
+  if (animationMode == 0) {
+    animate0();
+  }
+  if (animationMode == 1) {
+    animate1();
+  }
+  if (animationMode == 2) {
+    animate2();
+  }
+  if (animationMode == 3) {
+    animate3();
+  }
 
 void resetColors() {
     redValue = 0;
